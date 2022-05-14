@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pole2</title>
+    <style>
+        td {
+            width: 10px;
+            height: 10px;
+            border: 1px solid black;
+        }
+
+        table {
+            border-spacing: 0px;
+            border-collapse: collapse;
+            margin: auto;
+        }
+
+        .pole {
+            width: 100%;
+            height: fit-content;
+            /* border: 1px solid black; */
+            margin: 20px auto;
+        }
+
+        #row,
+        #column {
+            width: 50px;
+        }
+
+        .hedader {
+            width: 100%;
+            height: 10%;
+            border: 1px solid black;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+        }
+
+        .title {
+            width: 100%;
+            height: fit-content;
+            /* border: 1px solid black; */
+            font-size: 30px;
+            text-align: center;
+            margin: 0px auto 0px;
+        }
+
+        .createSize {
+            width: 100%;
+            height: fit-content;
+            /* border: 1px solid black; */
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+        }
+
+        .colorsButs {
+            width: 100%;
+            height: 30px;
+            /* border: 1px solid black; */
+            /* margin-bottom: 0px; */
+            display: flex;
+            flex-direction: row;
+        }
+
+        .color {
+            width: 30px;
+            height: 30px;
+            background-color: white;
+            border: 0px solid black;
+        }
+
+        .choiceColors {
+            width: fit-content;
+            height: 30px;
+            /* border: 1px solid black; */
+            margin-top: 0px;
+            line-height: 30px;
+        }
+
+        #newButColor {
+            width: 23px;
+            height: 20px;
+            margin: 4px 2px 1px;
+            border: 1px solid grey;
+        }
+        .butColor{
+            width: fit-content;
+            height: 20px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="hedader">
+        <p class="title">Поле для рисования по пиксилям</p>
+
+        <p class="createSize">
+            <span>
+                <span>Количество стобцов:</span>
+                <input type="number" value="50" id="column">
+            </span>
+
+            <span>
+                <span>Количество строк:</span>
+                <input type="number" value="50" id="row">
+            </span>
+
+            <button class="newSize">Изменить размер</button>
+
+            <span>
+                <input type="checkbox" id="visible_frames" checked="true">
+                <label for="visible_frames">Видимые рамки</label>
+            </span>
+
+            <span>
+                <button class="fonDel">Очистить фон</button>
+            </span>
+        </p>
+
+        <div class="colorsButs">
+            <p class="choiceColors">Выбать цвет:</p>
+            <input type="color" value="#000000" class='color'>
+            <button class="butColor">Сохранить цвет</button>
+        </div>
+
+    </div>
+
+    <div class="pole">
+        <table>
+
+        </table>
+    </div>
+
+    <script>
+        let row = document.querySelector('#row').value;
+        let column = document.querySelector('#column').value;
+        let numId = 0;
+        let checkedBut = document.querySelector('#visible_frames');
+        let butColor = document.querySelector('.butColor');
+        let fonDel = document.querySelector('.fonDel');;
+        createPole(row, column);
+
+        document.querySelector('.newSize').onclick = () => {
+            document.querySelector('table').remove();
+            let table = document.createElement('table');
+            document.querySelector('.pole').appendChild(table);
+            row = document.querySelector('#row').value;
+            column = document.querySelector('#column').value;
+            createPole(row, column);
+        }
+
+        checkedBut.onclick = () => {
+            let tdChecked = document.querySelectorAll('td');
+            if (checkedBut.checked == true) {
+                for (let i = 0; i < tdChecked.length; i++) {
+                    tdChecked[i].style.border = 1 + 'px solid black';
+                }
+            } else {
+                for (let i = 0; i < tdChecked.length; i++) {
+                    tdChecked[i].style.border = 0 + 'px solid white';
+                }
+            }
+
+        }
+
+        function createPole(row, column) {
+            for (let rowI = 0; rowI < row; rowI++) {
+                let tr = document.createElement('tr');
+                document.querySelector('table').appendChild(tr);
+                for (let columnI = 0; columnI < column; columnI++) {
+                    let td = document.createElement('td');
+                    td.id = numId;
+                    numId++;
+                    document.querySelector('table').appendChild(td);
+                    td.onclick = () => {
+                        color = document.querySelector('.color').value;
+                        document.getElementById(td.id).style.background = color;
+                    }
+                }
+            }
+        }
+
+        butColor.onclick = () => {
+            color = document.querySelector('.color').value;//в переменную колор педераем цвет из копки
+            let newButColor = document.createElement('div');//создаем новый элемент куда запишем этот цвет
+            newButColor.id = 'newButColor'// id чисто что бы красиво было
+            newButColor.style.background = color;//задаем цвет
+            document.querySelector('.colorsButs').appendChild(newButColor);
+            newButColor.onclick = () => {//онклик по элементу со сохраненым цветом
+                let rgbColor = newButColor.style.backgroundColor; // записывем
+                let parts = rgbColor.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);//непонятная хуйня
+                delete (parts[0]);
+                for (let i = 1; i <= 3; ++i) {
+                    parts[i] = parseInt(parts[i]).toString(16);
+                    if (parts[i].length == 1) parts[i] = '0' + parts[i];
+                } 
+                let hexString ='#'+parts.join('').toUpperCase(); // тут уже цвет из rgb переписан в hex
+                document.querySelector('.color').value =hexString;
+            }
+        }
+
+        fonDel.onclick=()=>{
+            let tdDel=document.querySelectorAll('td');
+            for (let i = 0; i < tdDel.length; i++) {
+                tdDel[i].style.background ='white';
+            }
+        }
+    </script>
+</body>
+
+</html>
