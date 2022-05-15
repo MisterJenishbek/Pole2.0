@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>pole2</title>
+    <script type="text/javascript" src="html2canvas.js"></script>
     <style>
         td {
             width: 10px;
@@ -82,16 +83,33 @@
             line-height: 30px;
         }
 
+        .colorsButsNew {
+            width: fit-content;
+            height: 30px;
+            /* border: 1px solid black; */
+            margin-top: 0px;
+            display: flex;
+            flex-direction: row;
+        }
+
         #newButColor {
             width: 23px;
             height: 20px;
             margin: 4px 2px 1px;
             border: 1px solid grey;
         }
-        .butColor{
+
+        .butColor {
             width: fit-content;
             height: 20px;
             margin-top: 5px;
+        }
+
+        .scrin {
+            width: 100%;
+            height: fit-content;
+            /* border: 1px solid black; */
+            margin: 200px auto;
         }
     </style>
 </head>
@@ -121,12 +139,17 @@
             <span>
                 <button class="fonDel">Очистить фон</button>
             </span>
+
+            <span>
+                <button class="butScrin">Сделать скин</button>
+            </span>
         </p>
 
         <div class="colorsButs">
             <p class="choiceColors">Выбать цвет:</p>
             <input type="color" value="#000000" class='color'>
             <button class="butColor">Сохранить цвет</button>
+            <p class="colorsButsNew"></p>
         </div>
 
     </div>
@@ -136,14 +159,15 @@
 
         </table>
     </div>
-
+    <div class="scrin"></div>
     <script>
         let row = document.querySelector('#row').value;
         let column = document.querySelector('#column').value;
         let numId = 0;
+        let colorClass = 0;
         let checkedBut = document.querySelector('#visible_frames');
         let butColor = document.querySelector('.butColor');
-        let fonDel = document.querySelector('.fonDel');;
+        let fonDel = document.querySelector('.fonDel');
         createPole(row, column);
 
         document.querySelector('.newSize').onclick = () => {
@@ -189,9 +213,11 @@
         butColor.onclick = () => {
             color = document.querySelector('.color').value;//в переменную колор педераем цвет из копки
             let newButColor = document.createElement('div');//создаем новый элемент куда запишем этот цвет
+            // newButColor.className = "Num" + colorClass;
+            // colorClass++;
             newButColor.id = 'newButColor'// id чисто что бы красиво было
             newButColor.style.background = color;//задаем цвет
-            document.querySelector('.colorsButs').appendChild(newButColor);
+            document.querySelector('.colorsButsNew').appendChild(newButColor);
             newButColor.onclick = () => {//онклик по элементу со сохраненым цветом
                 let rgbColor = newButColor.style.backgroundColor; // записывем
                 let parts = rgbColor.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);//непонятная хуйня
@@ -199,17 +225,41 @@
                 for (let i = 1; i <= 3; ++i) {
                     parts[i] = parseInt(parts[i]).toString(16);
                     if (parts[i].length == 1) parts[i] = '0' + parts[i];
-                } 
-                let hexString ='#'+parts.join('').toUpperCase(); // тут уже цвет из rgb переписан в hex
-                document.querySelector('.color').value =hexString;
+                }
+                let hexString = '#' + parts.join('').toUpperCase(); // тут уже цвет из rgb переписан в hex
+                document.querySelector('.color').value = hexString;
+            }
+            newButColor.ondblclick = () => {
+                let numAll = document.querySelectorAll("p.colorsButsNew div");
+                let num = document.querySelector("p.colorsButsNew");
+                let numdel = document.querySelectorAll("p.colorsButsNew div")[numAll.length - 1];
+                num.removeChild(numdel);
+            }
+
+        }
+
+        fonDel.onclick = () => {
+            let tdDel = document.querySelectorAll('td');
+            for (let i = 0; i < tdDel.length; i++) {
+                tdDel[i].style.background = 'white';
             }
         }
 
-        fonDel.onclick=()=>{
-            let tdDel=document.querySelectorAll('td');
-            for (let i = 0; i < tdDel.length; i++) {
-                tdDel[i].style.background ='white';
-            }
+        document.querySelector('.butScrin').onclick = () => {
+            html2canvas(document.querySelector("table")).then(function (canvas) {
+                var my_screen = canvas;
+                my_screen.className = "scrinPic";
+                document.querySelector(".scrin").appendChild(my_screen);
+                html2canvas(my_screen).then(canvas => canvas.toBlob(blob => navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])));
+                let i = 0;
+                let timer = setInterval(function () {
+                    if (i > 1) {
+                        document.querySelector(".scrinPic").remove();
+                        clearInterval(timer);
+                    } else i++;
+                }, 1)
+                alert('Скриншот в вашем буфере обмена.');
+            });
         }
     </script>
 </body>
